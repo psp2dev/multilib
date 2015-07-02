@@ -1,0 +1,56 @@
+---
+# Copyright (C) 2015 PSP2SDK Project
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/devkitPro
+
+before_install:
+ - set -e
+ - curl -Ls https://download.sourceforge.net/devkitpro/devkitARMupdate.pl | perl
+ - git clone git://github.com/psp2dev/libs "$PSP2LIBS"
+
+script:
+ - export FILE=psp2-multilib-dirty-$(git describe --always).zip
+
+ - aclocal
+ - automake --add-missing
+ - autoconf
+
+ - mkdir out
+ - cd out
+ - ../configure $FLAGS || cat config.log
+ - make install -j4
+
+ - mkdir fpu
+ - cd fpu
+ - ../../configure $FLAGS --with-fpu
+ - make install -j4
+ - cd ..
+
+ - mkdir thumb
+ - cd thumb
+ - ../../configure $FLAGS --with-thumb
+ - make install -j4
+
+ - cd $PREFIX/arm-none-eabi/lib
+ - zip -0rq $FILE psp2
+
+after_success:
+ - curl -q -T $FILE -u $FTP ftp://wololo.net/
+
+env:
+ global:
+  - DEVKITPRO="$HOME/devkitPro"
+  - DEVKITARM="$DEVKITPRO/devkitARM"
+  - PATH="$PATH:$DEVKITARM/bin"
+  - PREFIX="$PWD/dist"
+  - PSP2LIBS="$PWD/libs"
+  - FLAGS="-q --host=arm-none-eabi --with-headers=$PSP2LIBS/include --prefix=$PREFIX"
+  - secure: "cqZkRZODwpZHdGFEHI9B1glfsIcYWbrC7arybnOCMnXH51eNbTbbsjexmupjOLAXO+v9wm9eoEHx0foTAkDk+5J0XMhPRIQE9eT6iI+AAvY7gthK3hBz3GZsOo9NnCFHIAqzbp3abqQt93MCdfyjWyVwr+Zp3BHoq1P+zVhVis13w3xgaPF7E+De75+zxMwJZ/hrpKBfomxy48bsYvoILsE2d3ufbNnKEP3RABXZ9vrWoae5RfzNtTO5AMNRxDp02a6Hr07yoGu/FTccFrURulMqZVt/WgbKWuiZP2OQ98OTnmQXv0pAiESTFZh8C8qfSetEg5e3j3Efk7YQYKz2WEvpjDI+v/0//yk9JFZ0tc7p5l71FMDqrEdY0iOmsx8gAHbqPGRN/McLfXLyxqPjoQAuxHfYaVHPp5+iFsNpjeCm5wUITdijlUA6Y+IXoAK1iNqtGNW++WZ2jhD0ax0FEqoZtLLfLxIw/UvuXNU1dDxr3V5IK2dUQcSBxeZx40ADVq8RMzBFYloI5uwM9ddpygYF2jtSKWzh+xWhetDD8w+Wrc/E2WaWMKvTiyUco8uHUXod+zgtS03a+c/3z48D76dWsuvXpPyxArEJ1IByoYvh8M/zx7oVxNtapz7iAMrTWh5GutGB3MBFQQEwbRBW+31f/mEYjZqI9Jpqq2hx8qw="
