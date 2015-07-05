@@ -5,6 +5,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# 2.64 fails AC_PROG_CC with -notstdlib
+AC_PREREQ(2.65)
+
 AC_INIT(PSP2SDK, dirty-m4_esyscmd_s([git describe --always]),
 	https://github.com/psp2dev/psp2lib/issues)
 AC_CONFIG_SRCDIR(start/crt0.c)
