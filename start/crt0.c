@@ -12,20 +12,11 @@
 #include <psp2/types.h>
 #include <stdint.h>
 
-extern const char sceUserMainThreadName[] __attribute__((weak));
-extern const int sceUserMainThreadPriority __attribute__((weak));
-extern const SceSize sceUserMainThreadStackSize __attribute__((weak));
-extern const int psp2UserMainThreadAttr __attribute__((weak));
-extern const int psp2UserMainThreadAffinity __attribute__((weak));
-extern const SceKernelThreadOptParam psp2UserMainThreadOption __attribute__((weak));
-
 extern SceModuleInfo module_info;
 
 int main(int argc, char *argv[]);
 
-static SceUID id;
-
-static int _main(SceSize arglen, void *argp)
+static int module_start(SceSize arglen, void *argp)
 {
 	SceSize i, j;
 	int argc;
@@ -54,30 +45,11 @@ static int _main(SceSize arglen, void *argp)
 	return main(argc, *argv);
 }
 
-static int module_start(SceSize arglen, void *argp)
-{
-	return main(arglen, argp);
-	id = sceKernelCreateThread(
-		&sceUserMainThreadName == NULL ? "user_main" : sceUserMainThreadName,
-		_main,
-		&sceUserMainThreadPriority == NULL ? 0x10000100 : sceUserMainThreadPriority,
-		&sceUserMainThreadStackSize == NULL ? 1048576 : sceUserMainThreadStackSize,
-		&psp2UserMainThreadAttr == NULL ? 0 : psp2UserMainThreadAttr,
-		&psp2UserMainThreadAffinity == NULL ? 0 : psp2UserMainThreadAffinity,
-		&psp2UserMainThreadOption);
-	return id < 0 ? id : sceKernelStartThread(id, arglen, argp);
-}
-
-static int module_stop()
-{
-	return sceKernelDeleteThread(id);
-}
-
 static const uint32_t nids[3] __attribute__((section(".sceExport.rodata")))
-	= { 0x935CD196, 0x79F8E492, 0x6C2224BA };
+	= { 0x935CD196, 0x6C2224BA };
 
 static const uint32_t ents[3] __attribute__((section(".sceExport.rodata")))
-	= { (uint32_t)module_start, (uint32_t)module_stop, (uint32_t)&module_info };
+	= { (uint32_t)module_start, (uint32_t)&module_info };
 
 static const char name[] __attribute__((section(".sceExport.rodata")))
 	= "syslib";
