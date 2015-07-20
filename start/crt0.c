@@ -14,13 +14,18 @@
 
 extern SceModuleInfo module_info;
 
+void _init();
+void _fini();
+
 int main(int argc, char *argv[]);
 
 static int module_start(SceSize arglen, void *argp)
 {
 	SceSize i, j;
-	int argc;
+	int argc, res;
 	char ***argv;
+
+	_init();
 
 	argc = 0;
 	for (i = 0; i < arglen; i++)
@@ -42,7 +47,10 @@ static int module_start(SceSize arglen, void *argp)
 				break;
 		}
 
-	return main(argc, *argv);
+	res = main(argc, *argv);
+
+	_fini();
+	return res;
 }
 
 static const uint32_t nids[3] __attribute__((section(".sceExport.rodata")))
