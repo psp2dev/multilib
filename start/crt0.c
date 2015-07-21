@@ -15,10 +15,31 @@
 
 extern SceModuleInfo module_info;
 
-void _init();
-void _fini();
+extern void (* __init_array_start[])(void) __attribute__((weak));
+extern void (* __init_array_end[])(void) __attribute__((weak));
+
+extern void (* __fini_array_start[])(void) __attribute__((weak));
+extern void (* __fini_array_end[])(void) __attribute__((weak));
 
 int main(int argc, char *argv[]);
+
+static void runFuncArray(void (* start[])(void), void (* end[])(void))
+{
+	void (** p)();
+
+	for (p = start; p != end; p++)
+		(*p)();
+}
+
+static void _init()
+{
+	runFuncArray(__init_array_start, __init_array_end);
+}
+
+static void _fini()
+{
+	runFuncArray(__fini_array_start, __fini_array_end);
+}
 
 static void _Noreturn module_start(SceSize arglen, void *argp)
 {
