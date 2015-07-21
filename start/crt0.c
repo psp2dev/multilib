@@ -11,6 +11,7 @@
 #include <psp2/moduleinfo.h>
 #include <psp2/types.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 extern SceModuleInfo module_info;
 
@@ -19,13 +20,14 @@ void _fini();
 
 int main(int argc, char *argv[]);
 
-static int module_start(SceSize arglen, void *argp)
+static void _Noreturn module_start(SceSize arglen, void *argp)
 {
 	SceSize i, j;
-	int argc, res;
+	int argc;
 	char ***argv;
 
 	_init();
+        atexit(_fini);
 
 	argc = 0;
 	for (i = 0; i < arglen; i++)
@@ -47,10 +49,7 @@ static int module_start(SceSize arglen, void *argp)
 				break;
 		}
 
-	res = main(argc, *argv);
-
-	_fini();
-	return res;
+	exit(main(argc, *argv));
 }
 
 static const uint32_t nids[3] __attribute__((section(".sceExport.rodata")))
