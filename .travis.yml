@@ -12,8 +12,8 @@ cache:
     - $HOME/devkitPro
 
 before_install:
+ - curl -Ls https://download.sourceforge.net/devkitpro/devkitARMupdate.pl | perl; true
  - set -e
- - curl -Ls https://download.sourceforge.net/devkitpro/devkitARMupdate.pl | perl
  - git clone git://github.com/psp2dev/libs "$PSP2LIBS"
 
 script:
