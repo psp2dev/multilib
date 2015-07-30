@@ -45,7 +45,7 @@ static void _Noreturn module_start(SceSize arglen, void *argp)
 {
 	SceSize i, j;
 	int argc;
-	char ***argv;
+	char **argv;
 
 	_init();
         atexit(_fini);
@@ -58,19 +58,19 @@ static void _Noreturn module_start(SceSize arglen, void *argp)
 	argv = __builtin_alloca(sizeof(char *) * argc);
 
 	j = 0;
-	(*argv)[j] = argp;
+	argv[j] = argp;
 	j++;
 
 	for (i = 0; i < arglen; i++)
 		if (((char *)argp)[i] == '\0') {
-			(*argv)[j] = (char *)argp + i + 1;
+			argv[j] = (char *)argp + i + 1;
 
 			j++;
 			if (j >= argc)
 				break;
 		}
 
-	exit(main(argc, *argv));
+	exit(main(argc, argv));
 }
 
 static const uint32_t nids[3] __attribute__((section(".sceExport.rodata")))
