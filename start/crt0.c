@@ -43,9 +43,10 @@ static void _fini()
 
 static void _Noreturn module_start(SceSize arglen, void *argp)
 {
-	SceSize i, j;
+	SceSize i;
 	int argc;
 	char **argv;
+	char *p;
 
 	_init();
         atexit(_fini);
@@ -57,18 +58,14 @@ static void _Noreturn module_start(SceSize arglen, void *argp)
 
 	argv = __builtin_alloca(sizeof(char *) * argc);
 
-	j = 0;
-	argv[j] = argp;
-	j++;
+	i = 0;
+	p = argp;
+	while (i < argc) {
+		argv[i] = p;
+		i++;
 
-	for (i = 0; i < arglen; i++)
-		if (((char *)argp)[i] == '\0') {
-			argv[j] = (char *)argp + i + 1;
-
-			j++;
-			if (j >= argc)
-				break;
-		}
+		while (*p++ != 0);
+	}
 
 	exit(main(argc, argv));
 }
