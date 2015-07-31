@@ -23,22 +23,23 @@ extern void (* __fini_array_end[])(void) __attribute__((weak));
 
 int main(int argc, char *argv[]);
 
-static void runFuncArray(void (* start[])(void), void (* end[])(void))
+static void _init()
 {
 	void (** p)();
 
-	for (p = start; p != end; p++)
+	for (p = __init_array_start; p != __init_array_end; p++)
 		(*p)();
-}
-
-static void _init()
-{
-	runFuncArray(__init_array_start, __init_array_end);
 }
 
 static void _fini()
 {
-	runFuncArray(__fini_array_start, __fini_array_end);
+	void (** p)();
+
+	p = __fini_array_end;
+	while (p != __fini_array_start) {
+		p--;
+		(*p)();
+	}
 }
 
 static void _Noreturn module_start(SceSize arglen, void *argp)
