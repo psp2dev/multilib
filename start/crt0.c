@@ -50,7 +50,7 @@ static void _Noreturn module_start(SceSize arglen, void *argp)
 	char *p;
 
 	_init();
-        atexit(_fini);
+	atexit(_fini);
 
 	argc = 0;
 	for (i = 0; i < arglen; i++)
