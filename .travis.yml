@@ -38,9 +38,12 @@ script:
  - cd thumb
  - ../../configure $FLAGS --with-thumb
  - make install -j4
+ - cd ../..
+
+ - cp COPYING.TXT $PREFIX/arm-none-eabi/lib
 
  - cd $PREFIX/arm-none-eabi/lib
- - zip -0rq $FILE psp2
+ - zip -0rq $FILE COPYING.TXT psp2
 
 after_success:
  - curl -q -T $FILE -u $FTP ftp://176.31.100.204/
