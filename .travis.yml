@@ -16,9 +16,10 @@ before_install:
  - set -e
  - git clone git://github.com/psp2dev/libs "$PSP2LIBS"
 
-script:
- - export FILE=psp2-multilib-dirty-$(git describe --always).zip
+ - git clone -q --single-branch -b all "https://$TOKEN@github.com/psp2sdk/psp2sdk.git" $PREFIX | sed s/$TOKEN/\${TOKEN}/g
+ - find $PREFIX/arm-none-eabi/lib -type f ! -name crtend.o -a ! -name libgcc.a -delete
 
+script:
  - aclocal
  - automake --add-missing
  - autoconf
@@ -40,20 +41,20 @@ script:
  - make install -j4
  - cd ../..
 
- - cp COPYING.TXT $PREFIX/arm-none-eabi/lib
-
- - cd $PREFIX/arm-none-eabi/lib
- - zip -0rq $FILE COPYING.TXT psp2
-
 after_success:
- - curl -q -T $FILE -u $FTP ftp://176.31.100.204/
+ - cd $PREFIX
+ - git add -A arm-none-eabi/lib
+ - git config user.name "Travis CI"
+ - git config user.email contact@travis-ci.com
+ - git commit -qam "multilib dirty-$(git -C .. describe --always)"
+ - git push -q origin | sed s/$TOKEN/\${TOKEN}/g
 
 env:
  global:
   - DEVKITPRO="$HOME/devkitPro"
   - DEVKITARM="$DEVKITPRO/devkitARM"
   - PATH="$PATH:$DEVKITARM/bin"
-  - PREFIX="$PWD/dist"
+  - PREFIX="$PWD/multilib"
   - PSP2LIBS="$PWD/libs"
   - FLAGS="-q --host=arm-none-eabi --with-headers=$PSP2LIBS/include --prefix=$PREFIX"
-  - secure: "cqZkRZODwpZHdGFEHI9B1glfsIcYWbrC7arybnOCMnXH51eNbTbbsjexmupjOLAXO+v9wm9eoEHx0foTAkDk+5J0XMhPRIQE9eT6iI+AAvY7gthK3hBz3GZsOo9NnCFHIAqzbp3abqQt93MCdfyjWyVwr+Zp3BHoq1P+zVhVis13w3xgaPF7E+De75+zxMwJZ/hrpKBfomxy48bsYvoILsE2d3ufbNnKEP3RABXZ9vrWoae5RfzNtTO5AMNRxDp02a6Hr07yoGu/FTccFrURulMqZVt/WgbKWuiZP2OQ98OTnmQXv0pAiESTFZh8C8qfSetEg5e3j3Efk7YQYKz2WEvpjDI+v/0//yk9JFZ0tc7p5l71FMDqrEdY0iOmsx8gAHbqPGRN/McLfXLyxqPjoQAuxHfYaVHPp5+iFsNpjeCm5wUITdijlUA6Y+IXoAK1iNqtGNW++WZ2jhD0ax0FEqoZtLLfLxIw/UvuXNU1dDxr3V5IK2dUQcSBxeZx40ADVq8RMzBFYloI5uwM9ddpygYF2jtSKWzh+xWhetDD8w+Wrc/E2WaWMKvTiyUco8uHUXod+zgtS03a+c/3z48D76dWsuvXpPyxArEJ1IByoYvh8M/zx7oVxNtapz7iAMrTWh5GutGB3MBFQQEwbRBW+31f/mEYjZqI9Jpqq2hx8qw="
+  - secure: "Z+7kVFpyzaAqlASVk8J3OGiYAu6aCwLSFJfd+ztzvAIFg2y88lpv0CV1U9E+dwCTfqW8gIeoB100Yl+aCPJQ3EKGbrGHO4J+/vLRBfzLcV5wR4o4mp9ChTRUgBLCoqK67AcB8b6kw3fV3GvefXq0gT/gE52dsD72s/wUcV+8Ozva6SztNhySpBB21F8Fz46yk2idyQX9LtnVyovnS52iucAQCXvd7gaePQ0MtfSkLIMj0Z2Z57Dg7fA2P3mYROo/BBbtCN/9Pw0v8nAZUaKavU9v7VuXywn/pd76/s2vjcumH5REG/1WJ9G5nBE9W63yesKX4HfDI+bdICZAQuRap9/wQ71IZGR7dFI7RsjDryw1lLYVuvJPYPO8TTvdoKUrsXo24r8G5KB6NBXl+9hYMeQkr5Bh1LJSuXbY1xRlMOoh0BP91Y4YBE0BMUWi23XmvZgT7ACumbPMXRYPjpBwEjRBsVafjEh38g96Um011gq0Det9+Jt1rl1G1kLwOmh1GDKp8+mUeILXHarW0X9j7Mqs13ZOw7OYQlP3HE6L13ozYgwJyaeuSyal06UP0p9uxMaXf8qHXI1laRf3k28KJgs3GQA4LMxYqhUwV6UbJTQLYlCO0R+xnGyw6BbLb+bqH/e30ZX+yRL6jxXYIuQDnealqv4AvkbEJWjs2oMTvR0="
